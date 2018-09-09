@@ -1,0 +1,62 @@
+[
+  {
+    "lot": "9999994",
+    "currentLots": [
+      {
+        "currentLot": "9999994",
+        "currentLogpoint": "4100",
+        "currentEntity": "E766",
+        "currentTransDate": "2018-06-01 11:07",
+        "operator": "A0284827",
+        "shift": "D"
+      }
+    ]
+  },
+  {
+    "lot": "9999995",
+    "currentLots": [
+      {
+        "currentLot": "9999955",
+        "currentLogpoint": "4100",
+        "currentEntity": "E766",
+        "currentTransDate": "2018-06-01 11:07",
+        "operator": "A0284827",
+        "shift": "D"
+      }
+    ]
+  },
+  {
+    "lot": "9999996",
+    "currentLots": [
+      {
+        "currentLot": "9999996",
+        "currentLogpoint": "4200",
+        "currentEntity": "E766",
+        "currentTransDate": "2018-06-01 11:07",
+        "operator": "A0284827",
+        "shift": "D"
+      },
+      {
+        "currentLot": "9999966",
+        "currentLogpoint": "4200",
+        "currentEntity": "E767",
+        "currentTransDate": "2018-06-01 11:07",
+        "operator": "A0284827",
+        "shift": "D"
+      }
+    ]
+  },
+  {
+    "lot": "9999999",
+    "currentLots": [
+      {
+        "currentLot": "9999999",
+        "currentLogpoint": "4200",
+        "currentEntity": "E766",
+        "currentTransDate": "2018-06-01 11:07",
+        "operator": "A0284827",
+        "shift": "D"
+      }
+    ]
+  }
+]
