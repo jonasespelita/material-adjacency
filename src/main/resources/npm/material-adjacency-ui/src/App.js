@@ -5,7 +5,7 @@ import "./App.css";
 
 import Sidebar from "./Sidebar";
 import AppNavbar from "./AppNavbar";
-import Main from "./Main";
+// import Main from "./Main";
 import Machine from "./Machine"
 
 class App extends Component {

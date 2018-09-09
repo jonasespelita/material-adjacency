@@ -1,12 +1,10 @@
-import React, { Component, Fragment } from "react";
-import { testJsonData } from "./test-json";
-
+import React, { Component } from "react";
+import LotGenProcessor from "./LotGenProcessor";
+import glgData from "./json/glgData.json";
 import {
   FlexibleWidthXYPlot,
   XAxis,
-  YAxis,
   VerticalGridLines,
-  HorizontalGridLines,
   LineSeries,
   LabelSeries,
   MarkSeries
@@ -16,12 +14,12 @@ import "react-vis/dist/style.css";
 import Highlight from "./Highlight";
 
 export default class Machine extends Component {
-  curveSetting = "curveMonotoneY";
+  curveSetting = "curveMonotoneX";
 
   state = {
     lastDrawLocation: null,
     lpts: [],
-    lots: [
+    lotPlots: [
       { x: 0, y: 15, label: "lot1" },
       { x: 1, y: 15, label: "lot1" },
       { x: 2, y: 15, label: "lot1" },
@@ -32,47 +30,56 @@ export default class Machine extends Component {
       { x: 1, y: 13, label: "lot3" },
       { x: 1, y: 12, label: "lot4" }
     ],
-    lineSeries: [
-      <LineSeries
-        animation
-        curve={this.curveSetting}
-        data={[
-          { x: 0, y: 15 },
-          { x: 1, y: 15 },
-          { x: 2, y: 15 },
-          { x: 3, y: 15 }
-        ]}
-      />,
-      <LineSeries
-        animation
-        curve={this.curveSetting}
-        data={[
-          { x: 0, y: 15 },
-          { x: 1, y: 15 },
-          { x: 2, y: 14 },
-          { x: 3, y: 14 }
-        ]}
-      />,
-      <LineSeries
-        animation
-        curve={this.curveSetting}
-        data={[{ x: 0, y: 14 }, { x: 2, y: 14 }, { x: 3, y: 14 }]}
-      />,
-      <LineSeries
-        animation
-        curve={this.curveSetting}
-        data={[{ x: 1, y: 13 }, { x: 2, y: 14 }, { x: 3, y: 14 }]}
-      />,
-      <LineSeries
-        animation
-        curve={this.curveSetting}
-        data={[{ x: 1, y: 12 }, { x: 2, y: 14 }, { x: 3, y: 14 }]}
-      />
-    ]
+    lineSeries: []
   };
+  // [
+  //       <LineSeries
+  //         animation
+  //         curve={this.curveSetting}
+  //         data={[
+  //           { x: 0, y: 15 },
+  //           { x: 1, y: 15 },
+  //           { x: 2, y: 15 },
+  //           { x: 3, y: 15 }
+  //         ]}
+  //       />,
+  //       <LineSeries
+  //         animation
+  //         curve={this.curveSetting}
+  //         data={[
+  //           { x: 0, y: 15 },
+  //           { x: 1, y: 15 },
+  //           { x: 2, y: 14 },
+  //           { x: 3, y: 14 }
+  //         ]}
+  //       />,
+  //       <LineSeries
+  //         animation
+  //         curve={this.curveSetting}
+  //         data={[{ x: 0, y: 14 }, { x: 2, y: 14 }, { x: 3, y: 14 }]}
+  //       />,
+  //       <LineSeries
+  //         animation
+  //         curve={this.curveSetting}
+  //         data={[{ x: 1, y: 13 }, { x: 2, y: 14 }, { x: 3, y: 14 }]}
+  //       />,
+  //       <LineSeries
+  //         animation
+  //         curve={this.curveSetting}
+  //         data={[{ x: 1, y: 12 }, { x: 2, y: 14 }, { x: 3, y: 14 }]}
+  //       />
+  //     ]
+  componentDidMount() {
+    const { lpts, lotPlots, pathsData } = LotGenProcessor(glgData);
 
+    const lineSeries = pathsData.map(pathData => (
+      <LineSeries animation curve={this.curveSetting} data={pathData} />
+    ));
+
+    this.setState({ lpts, lotPlots, lineSeries });
+  }
   render() {
-    const { lastDrawLocation, lpts, lots, lineSeries } = this.state;
+    const { lastDrawLocation, lpts, lotPlots, lineSeries } = this.state;
 
     return (
       <main role="main" className="col-md-10 ml-sm-auto col-lg-10">
@@ -95,9 +102,10 @@ export default class Machine extends Component {
               ]
             }
           >
-            <VerticalGridLines tickValues={[...Array(lpts.length).keys()]} />
+            <VerticalGridLines animation tickValues={[...Array(lpts.length).keys()]} />
 
             <XAxis
+              animation
               tickFormat={(val, idx) => {
                 return lpts[val];
               }}
@@ -105,11 +113,11 @@ export default class Machine extends Component {
 
             {lineSeries}
 
-            <MarkSeries data={lots} animation size={20} />
+            <MarkSeries data={lotPlots} animation size={20} />
             <LabelSeries
               allowOffsetToBeReversed={false}
               className="lots"
-              data={lots}
+              data={lotPlots}
               animation
               labelAnchorX="middle"
               labelAnchorY="middle"
