@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import LotGenProcessor from "./LotGenProcessor";
-import glgData from "./json/glgData.json";
+import LotGenProcessor from "./LotGenProcessorV2";
+import glgData from "./json/response-data-export.json";
 
 import {
   FlexibleWidthXYPlot,
@@ -87,7 +87,7 @@ export default class Machine extends Component {
         <div className="row">
           <FlexibleWidthXYPlot
             animation
-            height={500}
+            height={800}
             xPadding={10}
             yPadding={10}
             xDomain={
@@ -117,14 +117,13 @@ export default class Machine extends Component {
 
             {lineSeries}
 
-            <MarkSeries data={lotPlots} animation size={20} />
+            <MarkSeries data={lotPlots} animation size={5} />
             <LabelSeries
               allowOffsetToBeReversed={false}
               className="lots"
               data={lotPlots}
               animation
               labelAnchorX="middle"
-              labelAnchorY="middle"
             />
 
             <Highlight

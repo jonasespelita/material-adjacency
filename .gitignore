@@ -24,3 +24,4 @@
 /nbdist/
 /.nb-gradle/
 src/main/resources/npm/node_modules/
+src/main/resources/npm/material-adjacency-ui/material-adjacency.sublime-workspace

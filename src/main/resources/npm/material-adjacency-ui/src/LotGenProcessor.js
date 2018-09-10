@@ -5,11 +5,11 @@ const LotGenProcessor = jsonData => {
 	const glg = jsonData.glgData;
 
 	// mother lot
-	const motherLots = glg.filter(lot => lot.parent === null);
+	const motherLots = glg.filter(lot => _.isEmpty(lot.parentIds));
 	console.log({ motherLots });
 
 	// child lots
-	const childLots = glg.filter(lot => lot.parent !== null);
+	const childLots = glg.filter(lot => !_.isEmpty(lot.parentIds));
 
 	console.log({ childLots });
 
@@ -18,13 +18,14 @@ const LotGenProcessor = jsonData => {
 
 	// plot mother lots
 	motherLots.forEach((mLot, i) => {
-		console.log({ mLot, i });
-		lotPlots.push({
-			x: 0,
-			y: motherLots.length - i - 1,
-			label: mLot.lot,
-			details: mLot
-		});
+		if (i == 0) {
+			lotPlots.push({
+				x: 0,
+				y: motherLots.length - i - 1,
+				label: mLot.lot,
+				details: mLot
+			});
+		}
 	});
 
 	// plot child lots
@@ -35,7 +36,7 @@ const LotGenProcessor = jsonData => {
 
 		// find ur parents
 		const pLotIdxs = lotPlots.reduce((pLotIdxs, lotPlot, idx) => {
-			if (lotPlot.details.id == curLot.parent) {
+			if (lotPlot.details.id == curLot.parentIds) {
 				pLotIdxs.push({ pLot: lotPlot, pIdx: idx });
 			}
 			return pLotIdxs;

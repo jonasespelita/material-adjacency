@@ -4,6 +4,54 @@
 		"selected_items":
 		[
 			[
+				"prevPa",
+				"prevPathCoord"
+			],
+			[
+				"prev",
+				"prevPathCoord"
+			],
+			[
+				"path",
+				"pathData"
+			],
+			[
+				"pLot",
+				"pLotCoord"
+			],
+			[
+				"pLotCoo",
+				"pLotCoord"
+			],
+			[
+				"last",
+				"lastCoord"
+			],
+			[
+				"pat",
+				"pathData"
+			],
+			[
+				"cur",
+				"curLot"
+			],
+			[
+				"mother",
+				"motherLots"
+			],
+			[
+				"lot",
+				"lotPlots"
+			],
+			[
+				"cons",
+				"console"
+			],
+			[
+				"chil",
+				"childLots"
+			],
+			[
 				"paddi",
 				"padding-left\tproperty"
 			],
@@ -32,11 +80,80 @@
 	"buffers":
 	[
 		{
-			"contents": " ",
+			"file": "src/index.js",
 			"settings":
 			{
-				"buffer_size": 1,
+				"buffer_size": 255,
+				"encoding": "UTF-8",
 				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/Machine.js",
+			"settings":
+			{
+				"buffer_size": 4529,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "import _ from \"lodash\";\n\nconst LotGenProcessor = jsonData => {\n\tconsole.log(jsonData);\n\tconst glg = jsonData.glgData;\n\n\t// mother lot\n\tconst motherLots = glg.filter(lot => _.isEmpty(lot.parentIds));\n\tconsole.log({ motherLots });\n\n\t// child lots\n\tconst childLots = glg.filter(lot => !_.isEmpty(lot.parentIds));\n\n\n\tconst lotPlots = [];\n\tconst pathsData = [];\n\n\t// plot mother lots\n\tmotherLots.forEach((mLot, i) => {\n\t\tif (i == 0) {\n\t\t\tlotPlots.push({\n\t\t\t\tx: 0,\n\t\t\t\ty: motherLots.length - i - 1,\n\t\t\t\tlabel: mLot.lot,\n\t\t\t\tdetails: mLot\n\t\t\t});\n\t\t}\n\t});\n\n\t// plot child lots\n\n\twhile (childLots.length) {\n\t\tconst curLot = childLots.shift();\n\t\tconsole.log({ curLot });\n\n\t\t// find ur parents\n\t\tconst pLotIdxs = lotPlots.reduce((pLotIdxs, lotPlot, idx) => {\n\t\t\tif (lotPlot.details.id == curLot.parentIds) {\n\t\t\t\tpLotIdxs.push({ pLot: lotPlot, pIdx: idx });\n\t\t\t}\n\t\t\treturn pLotIdxs;\n\t\t}, []);\n\n\t\tconsole.log({ pLotIdxs });\n\t\tpLotIdxs.forEach(pLotIdx => {\n\t\t\tconst { pLot } = pLotIdx;\n\t\t\tconsole.log(\n\t\t\t\t`${pLot.details.id}|${pLot.details.lot} => ${curLot.id}|${\n\t\t\t\t\tcurLot.lot\n\t\t\t\t}`\n\t\t\t);\n\t\t});\n\n\t\tif (pLotIdxs.length) {\n\t\t\t// x = max(x) of pLots + 1\n\t\t\tconst x =\n\t\t\t\tpLotIdxs\n\t\t\t\t\t.map(pLotIdx => pLotIdx.pLot.x)\n\t\t\t\t\t.reduce((maxX, x) => Math.max(maxX, x)) - 1;\n\n\t\t\t// y = max(y of current x ) -1\n\t\t\tconst y =\n\t\t\t\tlotPlots\n\t\t\t\t\t.filter(lotPlot => lotPlot.x === x)\n\t\t\t\t\t.reduce((minY, lotPlot) => Math.min(minY, lotPlot.y), 1) -\n\t\t\t\t1;\n\n\t\t\tconsole.log({\n\t\t\t\tx,\n\t\t\t\ty\n\t\t\t});\n\n\t\t\tlotPlots.push({ x, y, label: curLot.lot, details: curLot });\n\n\t\t\t// generate lines from parent\n\t\t\t// find existing path to join with\n\n\t\t\tconst pLotCoords = pLotIdxs.map(pLotIdx => {\n\t\t\t\treturn { x: pLotIdx.pLot.x, y: pLotIdx.pLot.y };\n\t\t\t});\n\t\t\tconsole.log({ pLotCoords });\n\t\t\tpLotCoords.forEach(pLotCoord => {\n\t\t\t\t// find path where last coord is compatible\n\t\t\t\tconst pathData = pathsData.find(pathData => {\n\t\t\t\t\tconst lastCoord = _.last(pathData);\n\t\t\t\t\tif (lastCoord) {\n\t\t\t\t\t\treturn (\n\t\t\t\t\t\t\tlastCoord.x == pLotCoord.x &&\n\t\t\t\t\t\t\tlastCoord.y == pLotCoord.y\n\t\t\t\t\t\t);\n\t\t\t\t\t} else {\n\t\t\t\t\t\treturn false;\n\t\t\t\t\t}\n\t\t\t\t});\n\n\t\t\t\tif (pathData) {\n\t\t\t\t\t// append child coord\n\t\t\t\t\tpathData.push({ x, y });\n\t\t\t\t} else {\n\t\t\t\t\t// create from parent to child\n\t\t\t\t\tpathsData.push([\n\t\t\t\t\t\t{ x: pLotCoord.x, y: pLotCoord.y },\n\t\t\t\t\t\t{ x, y }\n\t\t\t\t\t]);\n\t\t\t\t}\n\t\t\t});\n\t\t}\n\t}\n\n\tconst lpts = _.reverse(jsonData.logpointOrder.map(lpt => lpt.logpoint));\n\n\tconsole.log({ lotPlots });\n\tconsole.log({ lpts });\n\tconsole.log({ pathsData });\n\treturn { lpts, lotPlots, pathsData };\n};\n\nexport default LotGenProcessor;\n",
+			"file": "src/LotGenProcessor.js",
+			"file_size": 2701,
+			"file_write_time": 131810693382886555,
+			"settings":
+			{
+				"buffer_size": 2553,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/LotGenProcessorV2.js",
+			"settings":
+			{
+				"buffer_size": 487,
+				"encoding": "UTF-8",
+				"line_ending": "Windows",
+				"name": "import _ from \"lodash\""
+			}
+		},
+		{
+			"file": "src/json/glgData.json",
+			"settings":
+			{
+				"buffer_size": 3282,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/Main.css",
+			"settings":
+			{
+				"buffer_size": 193,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/App.js",
+			"settings":
+			{
+				"buffer_size": 995,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "Package Control Messages\n========================\n\nJsPrettier\n----------\n\n  # Js​Prettier\n  \n      JsPrettier is a Sublime Text Plug-in for Prettier, the opinionated code\n      formatter.\n  \n  \n  ## Install Prettier\n  \n      If you installed Prettier globally (using the yarn or npm command below),\n      there is nothing else you need to do.\n  \n          # using yarn:\n          yarn global add prettier\n  \n          # using npm:\n          npm install -g prettier\n  \n      You may be required to specify the path to the `prettier` executable, which\n      is configurable in the Package's settings file...\n  \n          -> \"Preferences\"\n          -> \"Package Settings\"\n          -> \"JsPrettier\"\n              -> \"Settings - Default\" (To view the default settings)\n              -> \"Settings - User\"    (To override the default settings)\n  \n  \n  ## Usage\n  \n      To run the JsPrettier command... open the Sublime Text Command Palette\n      (super + shift + p), and type \"JsPrettier: Format Code\".\n  \n      You can also right-click anywhere on the file to bring up the Context Menu\n      and select \"JsPrettier Format Code\".\n  \n  \n      ### Command Scope\n  \n          `JsPrettier` will attempt to format selections of code first, otherwise\n          the entire file will be formatted.\n  \n          > NOTE: When the `auto_format_on_save` setting is set to `true`, the\n          > entire file will always be formatted.\n  \n      ### Custom Key Binding\n  \n          To add a custom key binding to JsPrettier, please reference the\n          following example which binds `js_prettier` to \"ctrl/cmd + alt + f\".\n  \n              { \"keys\": [\"super+alt+f\"], \"command\": \"js_prettier\" }\n  \n  \n  ## Settings\n  \n      All Prettier options are configurable from the \"JsPrettier.sublime-settings\"\n      file, accessible from the Preferences > Package Settings > JsPrettier menu\n      shortcut.\n  \n      ### Project-level Settings\n  \n      JsPrettier supports Project-level settings, specified in\n      \"<project_name>.sublime-project\" files. In order for Project-level\n      settings to override the Defaults and User configured settings, a new\n      \"js_prettier\" section must be created under the project file's\n      \"settings\" section.\n  \n      Example Sublime Project File:\n  \n          {\n              \"folders\": [\n                  {\n                      \"path\": \".\"\n                  }\n              ],\n              \"settings\": {\n                  \"js_prettier\": {\n                      \"debug\": false,\n                      \"prettier_cli_path\": \"\",\n                      \"node_path\": \"\",\n                      \"auto_format_on_save\": false,\n                      \"auto_format_on_save_excludes\": [],\n                      \"auto_format_on_save_requires_prettier_config\": false,\n                      \"allow_inline_formatting\": false,\n                      \"custom_file_extensions\": [],\n                      \"max_file_size_limit\": -1,\n                      \"additional_cli_args\": {},\n                      \"prettier_options\": {\n                          \"printWidth\": 80,\n                          \"singleQuote\": false,\n                          \"trailingComma\": \"none\",\n                          \"bracketSpacing\": true,\n                          \"jsxBracketSameLine\": false,\n                          \"parser\": \"babylon\",\n                          \"semi\": true,\n                          \"requirePragma\": false,\n                          \"proseWrap\": \"preserve\",\n                          \"arrowParens\": \"avoid\"\n                      }\n                  }\n              }\n          }\n  \n  \n  ## Help\n  \n      For additional help, including reporting issues, please visit the\n      JsPrettier homepage @ https://github.com/jonlabelle/SublimeJsPrettier.\n  \n  \n  ## Author\n  \n      Jon LaBelle\n  \n  \n  ## License\n  \n      The MIT License (MIT)\n  \n      Copyright (c) 2018 Jon LaBelle\n",
+			"settings":
+			{
+				"buffer_size": 3873,
+				"line_ending": "Windows",
+				"name": "Package Control Messages",
+				"read_only": true,
+				"scratch": true
 			}
 		}
 	],
@@ -52,16 +169,56 @@
 		"selected_items":
 		[
 			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"revealr",
+				"File: Reveal in Sidebar"
+			],
+			[
+				"termina",
+				"Terminal: Open"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"key",
+				"Preferences: Key Bindings"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"pret",
+				"JsPrettier: Format Code"
+			],
+			[
+				"prett",
+				"JsPrettier: Format Code"
+			],
+			[
+				"babel",
+				"Set Syntax: JavaScript (Babel)"
+			],
+			[
+				"rettier",
+				"JsPrettier: Format Code"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
 				"indentation",
 				"Indentation: Convert to Spaces"
 			],
 			[
 				"mark",
 				"Set Syntax: Markdown"
-			],
-			[
-				"install",
-				"Package Control: Install Package"
 			],
 			[
 				"quic",
@@ -74,10 +231,6 @@
 			[
 				"git quic",
 				"Git: Quick Commit (current file)"
-			],
-			[
-				"insta",
-				"Package Control: Install Package"
 			],
 			[
 				"rein",
@@ -102,17 +255,13 @@
 			[
 				"php",
 				"Set Syntax: PHP"
-			],
-			[
-				"remove",
-				"Remove non Ascii characters (File)"
 			]
 		],
 		"width": 412.0
 	},
 	"console":
 	{
-		"height": 143.0,
+		"height": 296.0,
 		"history":
 		[
 		]
@@ -128,10 +277,17 @@
 	},
 	"expanded_folders":
 	[
-		"/C/Users/Jonas/Documents/GitHub/material-adjacency/src/main/resources/npm/material-adjacency-ui"
+		"/C/Users/Jonas/Documents/GitHub/material-adjacency/src/main/resources/npm/material-adjacency-ui",
+		"/C/Users/Jonas/Documents/GitHub/material-adjacency/src/main/resources/npm/material-adjacency-ui/src"
 	],
 	"file_history":
 	[
+		"/C/Users/Jonas/Downloads/response-data-export.json",
+		"/c/users/jonas/documents/github/material-adjacency/src/main/resources/npm/material-adjacency-ui/src/lotgenprocessor.js",
+		"/C/Users/Jonas/Documents/GitHub/material-adjacency/src/main/resources/npm/material-adjacency-ui/src/json/glgData.json",
+		"/C/Users/Jonas/Documents/GitHub/material-adjacency/src/main/resources/npm/material-adjacency-ui/src/json/glgDataEntityDetails.json",
+		"/C/Users/Jonas/AppData/Roaming/Sublime Text 3/Packages/JsPrettier/JsPrettier.sublime-settings",
+		"/C/Users/Jonas/Documents/GitHub/material-adjacency/src/main/resources/npm/material-adjacency-ui/material-adjacency.sublime-project",
 		"/C/Users/Jonas/Desktop/loan.md",
 		"/C/Users/Jonas/Documents/GitHub/material-adjacency/src/main/resources/npm/package.json",
 		"/C/Users/Jonas/Documents/y4uw/y4uw/single-acts_of_fraternity.php",
@@ -170,7 +326,7 @@
 	],
 	"find":
 	{
-		"height": 27.0
+		"height": 29.0
 	},
 	"find_in_files":
 	{
@@ -184,6 +340,27 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			".parent",
+			"maxX",
+			" == ",
+			" ==",
+			"== ",
+			"pathData",
+			"path",
+			"pLotCoords",
+			"pathData",
+			"maxHeight",
+			"pLots",
+			"pLot",
+			"pLotIdx",
+			"lots",
+			"parents",
+			"main",
+			"Main",
+			"curveSetting",
+			"lots",
+			"this.lpts",
+			"logpoint"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -201,29 +378,117 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 3,
 			"sheets":
 			[
 				{
 					"buffer": 0,
+					"file": "src/index.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1,
+						"buffer_size": 255,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1,
-								1
+								255,
+								255
 							]
 						],
 						"settings":
 						{
-							"auto_name": "",
-							"syntax": "Packages/Text/Plain text.tmLanguage"
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "src/Machine.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4529,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1988,
+								1997
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1140.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/LotGenProcessor.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2553,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								880,
+								663
+							]
+						],
+						"settings":
+						{
+							"spell_check": true,
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 540.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "src/LotGenProcessorV2.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 487,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								298,
+								298
+							]
+						],
+						"settings":
+						{
+							"auto_name": "import _ from \"lodash\"",
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -231,17 +496,135 @@
 					},
 					"stack_index": 0,
 					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/json/glgData.json",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3282,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1426,
+								1426
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 564.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "src/Main.css",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 193,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "src/App.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 995,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								515,
+								515
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Babel/JavaScript (Babel).sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 60.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3873,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								796,
+								796
+							]
+						],
+						"settings":
+						{
+							"auto_indent": false,
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_width": 2,
+							"word_wrap": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 54.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
 				}
 			]
 		}
 	],
 	"incremental_find":
 	{
-		"height": 27.0
+		"height": 29.0
 	},
 	"input":
 	{
-		"height": 39.0
+		"height": 44.0
 	},
 	"layout":
 	{
@@ -278,7 +661,7 @@
 	"project": "material-adjacency.sublime-project",
 	"replace":
 	{
-		"height": 50.0
+		"height": 54.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -324,7 +707,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 364.0,
+	"side_bar_width": 233.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{
