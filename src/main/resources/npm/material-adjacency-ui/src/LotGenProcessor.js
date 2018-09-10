@@ -56,7 +56,7 @@ const LotGenProcessor = jsonData => {
 			const x =
 				pLotIdxs
 					.map(pLotIdx => pLotIdx.pLot.x)
-					.reduce((maxX, x) => Math.max(maxX, x)) + 1;
+					.reduce((maxX, x) => Math.max(maxX, x)) - 1;
 
 			// y = max(y of current x ) -1
 			const y =
@@ -107,7 +107,7 @@ const LotGenProcessor = jsonData => {
 		}
 	}
 
-	const lpts = jsonData.logpointOrder.map(lpt => lpt.logpoint);
+	const lpts = _.reverse(jsonData.logpointOrder.map(lpt => lpt.logpoint));
 
 	console.log({ lotPlots });
 	console.log({ lpts });

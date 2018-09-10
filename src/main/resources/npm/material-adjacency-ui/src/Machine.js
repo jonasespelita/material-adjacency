@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import LotGenProcessor from "./LotGenProcessor";
 import glgData from "./json/glgData.json";
+
 import {
   FlexibleWidthXYPlot,
   XAxis,
@@ -102,12 +103,15 @@ export default class Machine extends Component {
               ]
             }
           >
-            <VerticalGridLines animation tickValues={[...Array(lpts.length).keys()]} />
+            <VerticalGridLines
+              animation
+              tickValues={[...Array(lpts.length).keys()].map(i => i * -1)}
+            />
 
             <XAxis
               animation
               tickFormat={(val, idx) => {
-                return lpts[val];
+                return lpts[val * -1];
               }}
             />
 
