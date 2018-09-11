@@ -73,8 +73,8 @@ export default class Machine extends Component {
   componentDidMount() {
     const { lpts, lotPlots, pathsData } = LotGenProcessor(glgData);
 
-    const lineSeries = pathsData.map(pathData => (
-      <LineSeries animation curve={this.curveSetting} data={pathData} />
+    const lineSeries = pathsData.map((pathData,i) => (
+      <LineSeries animation curve={this.curveSetting} data={pathData} key={i}/>
     ));
 
     this.setState({ lpts, lotPlots, lineSeries });
@@ -87,7 +87,7 @@ export default class Machine extends Component {
         <div className="row">
           <FlexibleWidthXYPlot
             animation
-            height={800}
+            height={700}
             xPadding={10}
             yPadding={10}
             xDomain={

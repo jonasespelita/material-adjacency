@@ -24,7 +24,7 @@ const LotGenProcessor = jsonData => {
 				curMLotY = mLotY = mLotY - 5;
 			}
 
-			console.log("plotting", lot);
+			console.log("plotting", lot, { x: 0, y: curMLotY });
 			lotPlots.push({
 				x: 0,
 				y: curMLotY,
@@ -38,11 +38,7 @@ const LotGenProcessor = jsonData => {
 
 			// find child's plotted parents
 			const pLotIdxs = lotPlots.reduce((pLotIdxs, lotPlot, idx) => {
-				if (
-					lot.parentIds.find(
-						parentId => parentId === lotPlot.details.id
-					)
-				) {
+				if (lot.parentIds.find(parentId => parentId === lotPlot.details.id)) {
 					pLotIdxs.push({ pLot: lotPlot, pIdx: idx });
 				}
 				return pLotIdxs;
@@ -52,9 +48,7 @@ const LotGenProcessor = jsonData => {
 			pLotIdxs.forEach(pLotIdx => {
 				const { pLot } = pLotIdx;
 				console.log(
-					`${pLot.details.id}|${pLot.details.lot} => ${lot.id}|${
-						lot.lot
-					}`
+					`${pLot.details.id}|${pLot.details.lot} => ${lot.id}|${lot.lot}`
 				);
 			});
 
@@ -64,29 +58,25 @@ const LotGenProcessor = jsonData => {
 				/////////////////////////////
 				// generate coords for lot //
 				/////////////////////////////
-				
+
 				// x = max(x) of pLots + 1
 				// TODO: X should match designated lpts
 				const x =
 					pLotIdxs
 						.map(pLotIdx => pLotIdx.pLot.x)
-						.reduce((maxX, x) => Math.max(maxX, x)) + 1;
+						.reduce((maxX, x) => Math.max(maxX, x)) - 1;
 
 				// y = max(y of current x ) -1
 				const y =
 					lotPlots
 						.filter(lotPlot => lotPlot.x === x)
 						.reduce(
-							(minY, lotPlot) =>
-								Math.min(curMLotY, minY, lotPlot.y),
+							(minY, lotPlot) => Math.min(curMLotY + 1, minY, lotPlot.y),
 							1
 						) - 1;
 
-				console.log({
-					x,
-					y
-				});
-				console.log("plotting", lot);
+	
+				console.log("plotting", lot, { x, y });
 				lotPlots.push({ x, y, label: `${lot.lot}`, details: lot });
 
 				// update mLotY in case next lot is a mother lot
@@ -108,10 +98,7 @@ const LotGenProcessor = jsonData => {
 					const pathData = pathsData.find(pathData => {
 						const lastCoord = _.last(pathData);
 						if (lastCoord) {
-							return (
-								lastCoord.x == pLotCoord.x &&
-								lastCoord.y == pLotCoord.y
-							);
+							return lastCoord.x == pLotCoord.x && lastCoord.y == pLotCoord.y;
 						} else {
 							return false;
 						}
@@ -122,10 +109,7 @@ const LotGenProcessor = jsonData => {
 						pathData.push({ x, y });
 					} else {
 						// create from parent to child
-						pathsData.push([
-							{ x: pLotCoord.x, y: pLotCoord.y },
-							{ x, y }
-						]);
+						pathsData.push([{ x: pLotCoord.x, y: pLotCoord.y }, { x, y }]);
 					}
 				});
 			}
