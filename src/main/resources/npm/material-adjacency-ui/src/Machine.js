@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import LotGenProcessor from "./LotGenProcessorV2";
 import glgData from "./json/response-data-export.json";
 
+import './Machine.css'
+
 import {
   FlexibleWidthXYPlot,
   XAxis,
