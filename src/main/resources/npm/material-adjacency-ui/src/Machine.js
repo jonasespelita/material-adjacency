@@ -1,179 +1,240 @@
+// import glgData from "./json/tc2_complete_data.json";
+import glgData from "./json/response-data-export_tc2.json";
+
 import React, { Component } from "react";
 import LotGenProcessor from "./LotGenProcessorV2";
-import glgData from "./json/response-data-export.json";
-import { Button, ButtonGroup } from "reactstrap";
+import {
+  Button,
+  ButtonGroup,
+  Input,
+  Form,
+  FormGroup,
+  Row,
+  Col,
+  Card,
+  CardTitle,
+  CardText
+} from "reactstrap";
 import FeatherIcon from "feather-icons-react";
 
 import "./Machine.css";
 
 import {
-	Hint,
-	FlexibleWidthXYPlot,
-	XAxis,
-	VerticalGridLines,
-	LineSeries,
-	LabelSeries,
-	MarkSeries,
-	Crosshair
+  Hint,
+  FlexibleWidthXYPlot,
+  XAxis,
+  VerticalGridLines,
+  LineSeries,
+  LabelSeries,
+  MarkSeries,
+  Crosshair
 } from "react-vis";
 import "react-vis/dist/style.css";
 
 import Highlight from "./Highlight";
 
 export default class Machine extends Component {
-	curveSetting = "curveMonotoneX";
+  curveSetting = "curveMonotoneX";
 
-	state = {
-		lastDrawLocation: null,
-		lpts: [],
-		lotPlots: [],
-		lineSeries: [],
-		crosshairValues: [],
-		mode: "zoom",
-		highlightedLot: null
-	};
+  state = {
+    lastDrawLocation: null,
+    lpts: [],
+    lotPlots: [],
+    lineSeries: [],
+    crosshairValues: [],
+    mode: "zoom",
+    highlightedLot: null,
+    selectedLot: null
+  };
 
-	setToolTips(value) {
-		this.setState({
-			crosshairValues: [{ x: value.x }, { x: 0 }],
-			highlightedLot: value
-		});
-	}
+  componentDidMount() {
+    const { lpts, lotPlots, pathsData } = LotGenProcessor(glgData);
 
-	onMouseLeave() {
-		this.setState({ crosshairValues: [], highlightedLot: null });
-	}
+    const lineSeries = pathsData.map((pathData, i) => (
+      <LineSeries animation curve={this.curveSetting} data={pathData} key={i} />
+    ));
 
-	componentDidMount() {
-		const { lpts, lotPlots, pathsData } = LotGenProcessor(glgData);
+    this.setState({ lpts, lotPlots, lineSeries });
+  }
 
-		const lineSeries = pathsData.map((pathData, i) => (
-			<LineSeries animation curve={this.curveSetting} data={pathData} key={i} />
-		));
+  setToolTips(value) {
+    this.setState({
+      crosshairValues: [{ x: value.x }, { x: 0 }],
+      highlightedLot: value
+    });
+  }
 
-		this.setState({ lpts, lotPlots, lineSeries });
-	}
-	render() {
-		const {
-			lastDrawLocation,
-			lpts,
-			lotPlots,
-			lineSeries,
-			mode,
-			highlightedLot
-		} = this.state;
+  onMouseLeave() {
+    this.setState({ crosshairValues: [], highlightedLot: null });
+  }
 
-		let hintContent;
-		if (highlightedLot) {
-			hintContent = (
-				<div>
-					<b>{highlightedLot.label}</b>
-					<div>Equipment: {highlightedLot.details.equipment}</div>
-					<div>Logpoint: {highlightedLot.details.lpt}</div>
-					<div>Date: {highlightedLot.details.tranDttm}</div>
-				</div>
-			);
-		}
-		const hint = (
-			<Hint value={highlightedLot}>
-				<div className="my-tooltip">
-					<div className="my-tooltiptext">{hintContent}</div>
-				</div>
-			</Hint>
-		);
+  ///////////////////
+  // Do the render //
+  ///////////////////
+  render() {
+    const {
+      lastDrawLocation,
+      lpts,
+      lotPlots,
+      lineSeries,
+      mode,
+      highlightedLot,
+      selectedLot
+    } = this.state;
 
-		const highlight = (
-			<Highlight
-				onBrushEnd={area => this.setState({ lastDrawLocation: area })}
-				onDrag={area => {
-					if (lastDrawLocation) {
-						this.setState({
-							lastDrawLocation: {
-								bottom:
-									this.state.lastDrawLocation.bottom + (area.top - area.bottom),
-								left:
-									this.state.lastDrawLocation.left - (area.right - area.left),
-								right:
-									this.state.lastDrawLocation.right - (area.right - area.left),
-								top: this.state.lastDrawLocation.top + (area.top - area.bottom)
-							}
-						});
-					}
-				}}
-			/>
-		);
+    let hintContent;
+    if (highlightedLot) {
+      hintContent = (
+        <div>
+          <b>{highlightedLot.label}</b>
+          <div>Equipment: {highlightedLot.details.equipment}</div>
+          <div>Logpoint: {highlightedLot.details.lpt}</div>
+          <div>Date: {highlightedLot.details.tranDttm}</div>
+        </div>
+      );
+    }
 
-		return (
-			<main role="main" className="col-md-10 ml-sm-auto col-lg-10">
-				<div className="row mt-1">
-					<div className="col-md-10">
-						<Button onClick={() => this.setState({ mode: "zoom" })}>
-							{" "}
-							<FeatherIcon icon="search" />{" "}
-						</Button>{" "}
-						<Button onClick={() => this.setState({ mode: "select" })}>
-							{" "}
-							<FeatherIcon icon="navigation" />
-						</Button>{" "}
-						<div>{mode}</div>
-					</div>
-				</div>
-				<div className="row">
-					<FlexibleWidthXYPlot
-						animation
-						height={700}
-						xPadding={10}
-						yPadding={10}
-						xDomain={
-							lastDrawLocation && [
-								lastDrawLocation.left,
-								lastDrawLocation.right
-							]
-						}
-						yDomain={
-							lastDrawLocation && [
-								lastDrawLocation.bottom,
-								lastDrawLocation.top
-							]
-						}
-						onMouseLeave={() => this.onMouseLeave()}
-					>
-						<VerticalGridLines
-							animation
-							tickValues={[...Array(lpts.length).keys()].map(i => i * -1)}
-						/>
+    const padHighlightCoord = coord => {
+      if (!coord) {
+        return null;
+      }
+      return { x: coord.x, y: coord.y };
+    };
 
-						<XAxis
-							animation
-							tickFormat={(val, idx) => {
-								return lpts[val * -1];
-							}}
-						/>
+    const hint = (
+      <Hint value={padHighlightCoord(highlightedLot)}>
+        <div className="my-tooltip">
+          <div className="my-tooltiptext">{hintContent}</div>
+        </div>
+      </Hint>
+    );
 
-						{lineSeries}
+    const highlight = (
+      <Highlight
+        onBrushEnd={area => this.setState({ lastDrawLocation: area })}
+        onDrag={area => {
+          if (lastDrawLocation) {
+            this.setState({
+              lastDrawLocation: {
+                bottom:
+                  this.state.lastDrawLocation.bottom + (area.top - area.bottom),
+                left:
+                  this.state.lastDrawLocation.left - (area.right - area.left),
+                right:
+                  this.state.lastDrawLocation.right - (area.right - area.left),
+                top: this.state.lastDrawLocation.top + (area.top - area.bottom)
+              }
+            });
+          }
+        }}
+      />
+    );
 
-						<MarkSeries
-							data={lotPlots}
-							animation
-							size={5}
-							onValueMouseOver={point => this.setToolTips(point)}
-							onValueMouseOut={() => this.onMouseLeave()}
-						/>
+    let detailsCardContent;
+    if (selectedLot) {
+      detailsCardContent = (
+        <Card body>
+          {" "}
+          <CardTitle>{selectedLot.label}</CardTitle>
+          <CardText>
+            With supporting text below as a natural lead-in to additional
+            content.
+          </CardText>
+          <Button>Go somewhere</Button>
+        </Card>
+      );
+    }
+    const detailsCard = (
+      <div style={{ position: "fixed", top: 100, right: 10, width: "800px" }}>
+        {detailsCardContent}
+      </div>
+    );
 
-						<LabelSeries
-							allowOffsetToBeReversed={false}
-							className="lots"
-							data={lotPlots}
-							animation
-							labelAnchorX="middle"
-							// onNearestXY={(value, { index }) => this.onNearestXY(value, index)}
-						/>
+    return (
+      <main role="main" className="col-md-10 ml-sm-auto col-lg-10">
+        <div className="row mt-1">
+          <div className="col-md-5">
+            <Form inline>
+              <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
+                <ButtonGroup className="mr-sm-2">
+                  <Button onClick={() => this.setState({ mode: "zoom" })}>
+                    {" "}
+                    <FeatherIcon icon="search" />{" "}
+                  </Button>{" "}
+                  <Button onClick={() => this.setState({ mode: "select" })}>
+                    {" "}
+                    <FeatherIcon icon="navigation" />
+                  </Button>
+                </ButtonGroup>{" "}
+                <div>{mode}</div>
+              </FormGroup>
+              <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
+                <Input type="input" placeholder="lot filter" bsSize="10px" />
+              </FormGroup>
+            </Form>
+          </div>
+          <div className="col-md-2" />
+        </div>
 
-						{mode === "zoom" && highlight}
-						{highlightedLot != null && hint}
-					</FlexibleWidthXYPlot>
-				</div>
-			</main>
-		);
-	}
+        <div className="row">
+          <FlexibleWidthXYPlot
+            animation
+            height={700}
+            xPadding={10}
+            yPadding={10}
+            xDomain={
+              lastDrawLocation && [
+                lastDrawLocation.left,
+                lastDrawLocation.right
+              ]
+            }
+            yDomain={
+              lastDrawLocation && [
+                lastDrawLocation.bottom,
+                lastDrawLocation.top
+              ]
+            }
+            onMouseLeave={() => this.onMouseLeave()}
+          >
+            <VerticalGridLines
+              animation
+              tickValues={[...Array(lpts.length).keys()].map(i => i * -1)}
+            />
+
+            <XAxis
+              animation
+              tickFormat={(val, idx) => {
+                return lpts[val * -1];
+              }}
+            />
+
+            {lineSeries}
+
+            <MarkSeries
+              data={lotPlots}
+              animation
+              size={5}
+              onValueMouseOut={() => this.onMouseLeave()}
+              onValueClick={(d, info) => console.log(d, info)}
+              onValueMouseOver={point => this.setToolTips(point)}
+            />
+
+            <LabelSeries
+              allowOffsetToBeReversed={false}
+              className="lots"
+              data={lotPlots}
+              animation
+              labelAnchorX="middle"
+              onValueClick={(d, info) => this.setState({ selectedLot: d })}
+              // onNearestXY={(value, { index }) => this.onNearestXY(value, index)}
+            />
+
+            {mode === "zoom" && highlight}
+            {highlightedLot != null && hint}
+          </FlexibleWidthXYPlot>
+        </div>
+        {selectedLot != null && detailsCard}
+      </main>
+    );
+  }
 }

@@ -8,8 +8,9 @@
 }
 
 .my-tooltip {
-    position: relative;
-    display: inline-block;
+	z-index: -100;
+    /*position: relative;*/
+    /*display: inline-block;*/
 }
 
 /* Tooltip text */

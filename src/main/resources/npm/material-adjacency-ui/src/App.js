@@ -6,7 +6,7 @@ import "./App.css";
 import Sidebar from "./Sidebar";
 import AppNavbar from "./AppNavbar";
 // import Main from "./Main";
-import Machine from "./Machine"
+import Machine from "./Machine";
 
 class App extends Component {
   constructor(props) {
@@ -17,7 +17,6 @@ class App extends Component {
   }
   render() {
     const state = this.state;
-
 
     // quick router. sue me.
     let curPage;

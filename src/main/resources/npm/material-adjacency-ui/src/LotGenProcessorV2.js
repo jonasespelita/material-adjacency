@@ -37,7 +37,7 @@ const LotGenProcessor = jsonData => {
 
 			let y = 0;
 			// get mother lot y coord
-			if (mLotY != 0) {
+			if (!_.isEmpty(lptPlots)) {
 				y = curMLotY = mLotY = mLotY - 1;
 			}
 
