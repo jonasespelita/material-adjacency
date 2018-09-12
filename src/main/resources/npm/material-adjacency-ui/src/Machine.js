@@ -137,10 +137,11 @@ export default class Machine extends Component {
           {" "}
           <CardTitle>{selectedLot.label}</CardTitle>
           <CardText>
-            With supporting text below as a natural lead-in to additional
-            content.
+            Adjacent Lot Here
           </CardText>
-          <Button>Go somewhere</Button>
+          <Button onClick={() => this.setState({ selectedLot: null })}>
+            Close
+          </Button>
         </Card>
       );
     }
