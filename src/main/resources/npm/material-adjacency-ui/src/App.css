@@ -1,18 +1,38 @@
 @keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }
 
+.my-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+/* Tooltip text */
+.my-tooltip .my-tooltiptext {
+    width: 250px;
+    background-color: black;
+    color: #fff;
+    text-align: left;
+    padding: 5px 5px;
+    border-radius: 6px;
+}
 
 body {
-  font-size: .875rem;
+	font-size: 0.875rem;
 }
-
-
 
 /*
  * Utilities
  */
 
-.border-top { border-top: 1px solid #e5e5e5; }
-.border-bottom { border-bottom: 1px solid #e5e5e5; }
+.border-top {
+	border-top: 1px solid #e5e5e5;
+}
+.border-bottom {
+	border-bottom: 1px solid #e5e5e5;
+}

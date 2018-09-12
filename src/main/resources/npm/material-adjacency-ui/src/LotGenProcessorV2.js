@@ -12,12 +12,14 @@ const LotGenProcessor = jsonData => {
 	const lptPlots = jsonData.logpointOrder.map((lpt, i) => {
 		return {
 			id: lpt.id,
+			lpt: lpt.logpoint,
+			operation: lpt.operation,
 			name: `${lpt.logpoint}-${lpt.operation}`,
 			x: i - jsonData.logpointOrder.length + 1
 		};
 	});
 
-	lpts.push(...lptPlots.map(lptPlot => lptPlot.name));
+	lpts.push(..._.reverse(lptPlots.map(lptPlot => lptPlot.name)));
 	console.log({ lptPlots });
 
 	let mLotY = 0;
@@ -26,6 +28,8 @@ const LotGenProcessor = jsonData => {
 	// process geneology //
 	///////////////////////
 	glg.forEach((lot, i) => {
+		// derive lpt from id
+		lot.lpt = lptPlots.find(lptPlot => lptPlot.id === lot.lptOpnSeqId).lpt;
 		if (_.isEmpty(lot.parentIds)) {
 			////////////////
 			// mother lot //
@@ -52,11 +56,7 @@ const LotGenProcessor = jsonData => {
 
 			// find child's plotted parents
 			const pLotIdxs = lotPlots.reduce((pLotIdxs, lotPlot, idx) => {
-				if (
-					lot.parentIds.find(
-						parentId => parentId === lotPlot.details.id
-					)
-				) {
+				if (lot.parentIds.find(parentId => parentId === lotPlot.details.id)) {
 					pLotIdxs.push({ pLot: lotPlot, pIdx: idx });
 				}
 				return pLotIdxs;
@@ -66,9 +66,7 @@ const LotGenProcessor = jsonData => {
 			pLotIdxs.forEach(pLotIdx => {
 				const { pLot } = pLotIdx;
 				console.log(
-					`${pLot.details.id}|${pLot.details.lot} => ${lot.id}|${
-						lot.lot
-					}`
+					`${pLot.details.id}|${pLot.details.lot} => ${lot.id}|${lot.lot}`
 				);
 			});
 
@@ -80,17 +78,14 @@ const LotGenProcessor = jsonData => {
 				/////////////////////////////
 
 				// x = match designated lptOpnSeqId
-				const x = lptPlots.find(
-					lptPlot => lptPlot.id == lot.lptOpnSeqId
-				).x;
+				const x = lptPlots.find(lptPlot => lptPlot.id == lot.lptOpnSeqId).x;
 
 				// y = max(y of current x ) -1
 				const y =
 					lotPlots
 						.filter(lotPlot => lotPlot.x === x)
 						.reduce(
-							(minY, lotPlot) =>
-								Math.min(curMLotY + 1, minY, lotPlot.y),
+							(minY, lotPlot) => Math.min(curMLotY + 1, minY, lotPlot.y),
 							curMLotY + 1
 						) - 1;
 
@@ -116,10 +111,7 @@ const LotGenProcessor = jsonData => {
 					const pathData = pathsData.find(pathData => {
 						const lastCoord = _.last(pathData);
 						if (lastCoord) {
-							return (
-								lastCoord.x == pLotCoord.x &&
-								lastCoord.y == pLotCoord.y
-							);
+							return lastCoord.x == pLotCoord.x && lastCoord.y == pLotCoord.y;
 						} else {
 							return false;
 						}
@@ -130,10 +122,7 @@ const LotGenProcessor = jsonData => {
 						pathData.push({ x, y });
 					} else {
 						// create from parent to child
-						pathsData.push([
-							{ x: pLotCoord.x, y: pLotCoord.y },
-							{ x, y }
-						]);
+						pathsData.push([{ x: pLotCoord.x, y: pLotCoord.y }, { x, y }]);
 					}
 				});
 			}
