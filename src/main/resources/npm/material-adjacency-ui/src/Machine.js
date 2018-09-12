@@ -22,56 +22,10 @@ export default class Machine extends Component {
   state = {
     lastDrawLocation: null,
     lpts: [],
-    lotPlots: [
-      { x: 0, y: 15, label: "lot1" },
-      { x: 1, y: 15, label: "lot1" },
-      { x: 2, y: 15, label: "lot1" },
-      { x: 3, y: 15, label: "lot1" },
-      { x: 0, y: 14, label: "lot2" },
-      { x: 2, y: 14, label: "lot2" },
-      { x: 3, y: 14, label: "lot2" },
-      { x: 1, y: 13, label: "lot3" },
-      { x: 1, y: 12, label: "lot4" }
-    ],
+    lotPlots: [],
     lineSeries: []
   };
-  // [
-  //       <LineSeries
-  //         animation
-  //         curve={this.curveSetting}
-  //         data={[
-  //           { x: 0, y: 15 },
-  //           { x: 1, y: 15 },
-  //           { x: 2, y: 15 },
-  //           { x: 3, y: 15 }
-  //         ]}
-  //       />,
-  //       <LineSeries
-  //         animation
-  //         curve={this.curveSetting}
-  //         data={[
-  //           { x: 0, y: 15 },
-  //           { x: 1, y: 15 },
-  //           { x: 2, y: 14 },
-  //           { x: 3, y: 14 }
-  //         ]}
-  //       />,
-  //       <LineSeries
-  //         animation
-  //         curve={this.curveSetting}
-  //         data={[{ x: 0, y: 14 }, { x: 2, y: 14 }, { x: 3, y: 14 }]}
-  //       />,
-  //       <LineSeries
-  //         animation
-  //         curve={this.curveSetting}
-  //         data={[{ x: 1, y: 13 }, { x: 2, y: 14 }, { x: 3, y: 14 }]}
-  //       />,
-  //       <LineSeries
-  //         animation
-  //         curve={this.curveSetting}
-  //         data={[{ x: 1, y: 12 }, { x: 2, y: 14 }, { x: 3, y: 14 }]}
-  //       />
-  //     ]
+  
   componentDidMount() {
     const { lpts, lotPlots, pathsData } = LotGenProcessor(glgData);
 
