@@ -1,5 +1,5 @@
 // import glgData from "./json/tc2_complete_data.json";
-import glgData from "./json/response-data-export_tc2.json";
+import glgData from "./json/tc2_complete_data_v2.0.json";
 
 import React, { Component } from "react";
 import LotGenProcessor from "./LotGenProcessorV2";
@@ -136,9 +136,7 @@ export default class Machine extends Component {
         <Card body>
           {" "}
           <CardTitle>{selectedLot.label}</CardTitle>
-          <CardText>
-            Adjacent Lot Here
-          </CardText>
+          <CardText>Adjacent Lot Here</CardText>
           <Button onClick={() => this.setState({ selectedLot: null })}>
             Close
           </Button>
@@ -152,7 +150,7 @@ export default class Machine extends Component {
     );
 
     return (
-      <main role="main" className="col-md-10 ml-sm-auto col-lg-10">
+      <main role="main" className="col-md-11 ml-sm-auto col-lg-11">
         <div className="row mt-1">
           <div className="col-md-5">
             <Form inline>
@@ -170,7 +168,7 @@ export default class Machine extends Component {
                 <div>{mode}</div>
               </FormGroup>
               <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
-                <Input type="input" placeholder="lot filter" bsSize="10px" />
+                <Input type="input" placeholder="lot input" />
               </FormGroup>
             </Form>
           </div>
@@ -178,63 +176,240 @@ export default class Machine extends Component {
         </div>
 
         <div className="row">
-          <FlexibleWidthXYPlot
-            animation
-            height={700}
-            xPadding={10}
-            yPadding={10}
-            xDomain={
-              lastDrawLocation && [
-                lastDrawLocation.left,
-                lastDrawLocation.right
-              ]
-            }
-            yDomain={
-              lastDrawLocation && [
-                lastDrawLocation.bottom,
-                lastDrawLocation.top
-              ]
-            }
-            onMouseLeave={() => this.onMouseLeave()}
-          >
-            <VerticalGridLines
+          <div className="col-md-12">
+            <FlexibleWidthXYPlot
               animation
-              tickValues={[...Array(lpts.length).keys()].map(i => i * -1)}
-            />
+              height={700}
+              xPadding={10}
+              yPadding={10}
+              xDomain={
+                lastDrawLocation && [
+                  lastDrawLocation.left,
+                  lastDrawLocation.right
+                ]
+              }
+              yDomain={
+                lastDrawLocation && [
+                  lastDrawLocation.bottom,
+                  lastDrawLocation.top
+                ]
+              }
+              onMouseLeave={() => this.onMouseLeave()}
+            >
+              <VerticalGridLines
+                animation
+                tickValues={[...Array(lpts.length).keys()].map(i => i * -1)}
+              />
 
-            <XAxis
-              animation
-              tickFormat={(val, idx) => {
-                return lpts[val * -1];
-              }}
-            />
+              <XAxis
+                animation
+                tickFormat={(val, idx) => {
+                  return lpts[val * -1];
+                }}
+              />
 
-            {lineSeries}
+              {lineSeries}
 
-            <MarkSeries
-              data={lotPlots}
-              animation
-              size={5}
-              onValueMouseOut={() => this.onMouseLeave()}
-              onValueClick={(d, info) => console.log(d, info)}
-              onValueMouseOver={point => this.setToolTips(point)}
-            />
+              <MarkSeries
+                data={lotPlots}
+                animation
+                size={5}
+                onValueMouseOut={() => this.onMouseLeave()}
+                onValueClick={(d, info) => console.log(d, info)}
+                onValueMouseOver={point => this.setToolTips(point)}
+              />
 
-            <LabelSeries
-              allowOffsetToBeReversed={false}
-              className="lots"
-              data={lotPlots}
-              animation
-              labelAnchorX="middle"
-              onValueClick={(d, info) => this.setState({ selectedLot: d })}
-              // onNearestXY={(value, { index }) => this.onNearestXY(value, index)}
-            />
+              <LabelSeries
+                allowOffsetToBeReversed={false}
+                className="lots"
+                data={lotPlots}
+                animation
+                labelAnchorX="middle"
+                onValueClick={(d, info) => this.setState({ selectedLot: d })}
+                // onNearestXY={(value, { index }) => this.onNearestXY(value, index)}
+              />
 
-            {mode === "zoom" && highlight}
-            {highlightedLot != null && hint}
-          </FlexibleWidthXYPlot>
+              {mode === "zoom" && highlight}
+              {highlightedLot != null && hint}
+            </FlexibleWidthXYPlot>
+          </div>
+          {selectedLot != null && detailsCard}
+          <div className="col-md-3" style={{ position: "fixed", right: 0 }}>
+            <div className="row" style={{ height: "100%" }}>
+              <Card body>
+                <CardTitle>Equipment Commonality</CardTitle>
+                <CardText>table data goes here</CardText>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                  Consequuntur esse in, adipisci quia, molestiae voluptates
+                  magni, unde ipsam sed deserunt asperiores incidunt tenetur?
+                  Laboriosam dolorum, consectetur rerum, nesciunt tempora ipsa.
+                </p>
+              </Card>
+            </div>
+          </div>
         </div>
-        {selectedLot != null && detailsCard}
+        <div
+          className="row mt-1 "
+          style={{
+            height: "50%",
+            position: "fixed",
+            bottom: 0,
+            width: "92%",
+            display: "none"
+          }}
+        >
+          <Card body>
+            <CardTitle>Adjacent Lots</CardTitle>
+            <CardText>table data goes here</CardText>
+            <div style={{ overflowY: "scroll" }}>
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>{" "}
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
+                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
+                dolorum, consectetur rerum, nesciunt tempora ipsa.
+              </p>
+            </div>
+          </Card>
+        </div>
       </main>
     );
   }

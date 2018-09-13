@@ -5,7 +5,7 @@ import "./Sidebar.css";
 import FeatherIcon from "feather-icons-react";
 
 const Sidebar = () => (
-  <Navbar color="light" className="col-md-2 d-none d-md-block sidebar">
+  <Navbar color="light" className="col-md-1 d-none d-md-block sidebar">
     <div className="sidebar-sticky">
       <Nav vertical>
         <NavItem>
