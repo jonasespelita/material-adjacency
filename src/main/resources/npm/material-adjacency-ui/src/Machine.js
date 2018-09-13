@@ -1,6 +1,7 @@
 // import glgData from "./json/tc2_complete_data.json";
-import glgData from "./json/tc2_complete_data_v2.0.json";
+import glgData from "./json/tc2_complete_data_v2.4.json";
 
+import _ from "lodash";
 import React, { Component } from "react";
 import LotGenProcessor from "./LotGenProcessorV2";
 import {
@@ -13,7 +14,8 @@ import {
   Col,
   Card,
   CardTitle,
-  CardText
+  CardText,
+  Table
 } from "reactstrap";
 import FeatherIcon from "feather-icons-react";
 
@@ -40,21 +42,23 @@ export default class Machine extends Component {
     lastDrawLocation: null,
     lpts: [],
     lotPlots: [],
+    equipPlots: [],
     lineSeries: [],
     crosshairValues: [],
     mode: "zoom",
     highlightedLot: null,
-    selectedLot: null
+    selectedEquip: null,
+    showCommonalitySidebar: false
   };
 
   componentDidMount() {
-    const { lpts, lotPlots, pathsData } = LotGenProcessor(glgData);
+    const { lpts, lotPlots, pathsData, equipPlots } = LotGenProcessor(glgData);
 
     const lineSeries = pathsData.map((pathData, i) => (
       <LineSeries animation curve={this.curveSetting} data={pathData} key={i} />
     ));
 
-    this.setState({ lpts, lotPlots, lineSeries });
+    this.setState({ lpts, lotPlots, lineSeries, equipPlots });
   }
 
   setToolTips(value) {
@@ -79,7 +83,8 @@ export default class Machine extends Component {
       lineSeries,
       mode,
       highlightedLot,
-      selectedLot
+      selectedEquip,
+      equipPlots
     } = this.state;
 
     let hintContent;
@@ -131,13 +136,12 @@ export default class Machine extends Component {
     );
 
     let detailsCardContent;
-    if (selectedLot) {
+    if (selectedEquip) {
       detailsCardContent = (
         <Card body>
-          {" "}
-          <CardTitle>{selectedLot.label}</CardTitle>
+          <CardTitle>{selectedEquip.label}</CardTitle>
           <CardText>Adjacent Lot Here</CardText>
-          <Button onClick={() => this.setState({ selectedLot: null })}>
+          <Button onClick={() => this.setState({ selectedEquip: null })}>
             Close
           </Button>
         </Card>
@@ -149,26 +153,147 @@ export default class Machine extends Component {
       </div>
     );
 
+    let adjacentLotsCard;
+    if (selectedEquip) {
+      console.log(selectedEquip);
+      const adjacentLotsTableRows = selectedEquip.details.equip.adjacentLots.map(
+        (lot, i) => (
+          <tr key={i}>
+            <th>{lot.adjacentLot}</th>
+            <td>{lot.equipment}</td>
+            <td>{lot.startDttm}</td>
+            <td>{lot.loginDttm}</td>
+            <td>{lot.lastActDttm}</td>
+            <td>{lot.currentLogpoint}</td>
+            <td>{lot.lastLogpoint}</td>
+          </tr>
+        )
+      );
+      adjacentLotsCard = (
+        <div
+          className="row mt-1 "
+          style={{
+            height: "50%",
+            position: "fixed",
+            bottom: 0,
+            width: "92%"
+          }}
+        >
+          <Card body style={{ height: "100%" }}>
+            <CardTitle>
+              Equipment Details: {selectedEquip.label}{" "}
+              <Button
+                size="sm"
+                onClick={() => this.setState({ selectedEquip: null })}
+              >
+                close
+              </Button>
+            </CardTitle>
+            <CardText>
+              Commonality:{" "}
+              <b> {selectedEquip.details.equip.commonalityPercent}%</b>
+              <br />
+              <b>Adjacent Lots</b>{" "}
+            </CardText>
+            <div style={{ overflowY: "scroll" }}>
+              <Table striped>
+                <thead>
+                  <tr>
+                    <th>Lot</th>
+                    <th>Equipment</th>
+                    <th>Start Datetime</th>
+                    <th>Login Datetime</th>
+                    <th>Last Activity</th>
+                    <th>Current Lpt</th>
+                    <th>Last Lpt</th>
+                  </tr>
+                </thead>
+                <tbody>{adjacentLotsTableRows}</tbody>
+              </Table>
+            </div>
+          </Card>
+        </div>
+      );
+    }
+
+    const equipmentCommonalityDataRows = _.sortBy(
+      equipPlots,
+      e => e.details.equip.commonalityPercent * -1
+    ).map((equipPlot, i) => (
+      <tr key={i}>
+        <td>{equipPlot.details.lpt.logpoint}</td>
+        <td>{equipPlot.details.lpt.operation}</td>
+        <td>{equipPlot.details.equip.equipment}</td>
+        <td>{equipPlot.details.equip.commonalityPercent}</td>
+      </tr>
+    ));
+
+    let commonalitySideBar = (
+      <div
+        className="col-md-5"
+        style={{ position: "fixed", right: 0, height: "100%" }}
+      >
+        <div className="row" style={{ height: "100%" }}>
+          <Card body>
+            <CardTitle>Equipment Commonality</CardTitle>
+            <div style={{ overflowY: "scroll" }}>
+              <Table striped>
+                <thead>
+                  <tr>
+                    <th>Lpt</th>
+                    <th>Operation</th>
+                    <th>Equipment</th>
+                    <th>Commonality %</th>
+                  </tr>
+                </thead>
+                <tbody>{equipmentCommonalityDataRows}</tbody>
+              </Table>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
     return (
       <main role="main" className="col-md-11 ml-sm-auto col-lg-11">
         <div className="row mt-1">
-          <div className="col-md-5">
+          <div className="col-md-6">
             <Form inline>
               <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
                 <ButtonGroup className="mr-sm-2">
-                  <Button onClick={() => this.setState({ mode: "zoom" })}>
-                    {" "}
+                  <Button
+                    color={this.state.mode == "zoom" ? "primary" : "secondary"}
+                    onClick={() => this.setState({ mode: "zoom" })}
+                  >
                     <FeatherIcon icon="search" />{" "}
                   </Button>{" "}
-                  <Button onClick={() => this.setState({ mode: "select" })}>
-                    {" "}
+                  <Button
+                    color={
+                      this.state.mode == "select" ? "primary" : "secondary"
+                    }
+                    onClick={() => this.setState({ mode: "select" })}
+                  >
                     <FeatherIcon icon="navigation" />
                   </Button>
-                </ButtonGroup>{" "}
+                </ButtonGroup>
                 <div>{mode}</div>
               </FormGroup>
               <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
                 <Input type="input" placeholder="lot input" />
+              </FormGroup>
+              <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
+                <Button
+                  color={
+                    this.state.showCommonalitySidebar ? "primary" : "secondary"
+                  }
+                  onClick={() =>
+                    this.setState({
+                      showCommonalitySidebar: !this.state.showCommonalitySidebar
+                    })
+                  }
+                >
+                  {" "}
+                  <FeatherIcon icon="sidebar" />
+                </Button>
               </FormGroup>
             </Form>
           </div>
@@ -225,7 +350,17 @@ export default class Machine extends Component {
                 data={lotPlots}
                 animation
                 labelAnchorX="middle"
-                onValueClick={(d, info) => this.setState({ selectedLot: d })}
+                // onNearestXY={(value, { index }) => this.onNearestXY(value, index)}
+              />
+
+              <LabelSeries
+                allowOffsetToBeReversed={false}
+                className="equipments"
+                data={equipPlots}
+                animation
+                labelAnchorX="middle"
+                onValueClick={(d, info) => this.setState({ selectedEquip: d })}
+                rotation={34}
                 // onNearestXY={(value, { index }) => this.onNearestXY(value, index)}
               />
 
@@ -233,183 +368,9 @@ export default class Machine extends Component {
               {highlightedLot != null && hint}
             </FlexibleWidthXYPlot>
           </div>
-          {selectedLot != null && detailsCard}
-          <div className="col-md-3" style={{ position: "fixed", right: 0 }}>
-            <div className="row" style={{ height: "100%" }}>
-              <Card body>
-                <CardTitle>Equipment Commonality</CardTitle>
-                <CardText>table data goes here</CardText>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                  Consequuntur esse in, adipisci quia, molestiae voluptates
-                  magni, unde ipsam sed deserunt asperiores incidunt tenetur?
-                  Laboriosam dolorum, consectetur rerum, nesciunt tempora ipsa.
-                </p>
-              </Card>
-            </div>
-          </div>
+          {this.state.showCommonalitySidebar && commonalitySideBar}
         </div>
-        <div
-          className="row mt-1 "
-          style={{
-            height: "50%",
-            position: "fixed",
-            bottom: 0,
-            width: "92%",
-            display: "none"
-          }}
-        >
-          <Card body>
-            <CardTitle>Adjacent Lots</CardTitle>
-            <CardText>table data goes here</CardText>
-            <div style={{ overflowY: "scroll" }}>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>{" "}
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                Consequuntur esse in, adipisci quia, molestiae voluptates magni,
-                unde ipsam sed deserunt asperiores incidunt tenetur? Laboriosam
-                dolorum, consectetur rerum, nesciunt tempora ipsa.
-              </p>
-            </div>
-          </Card>
-        </div>
+        {selectedEquip && adjacentLotsCard}
       </main>
     );
   }
